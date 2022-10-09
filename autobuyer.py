@@ -1,87 +1,65 @@
-#Import Statements
 from os import curdir
+import os
 import time
-from pynput.keyboard import Controller as keyCont, Key
-from pynput.mouse import Controller, Button
+from pynput.keyboard import Controller as KeyboardController
+from pynput.mouse import Controller as MouseController, Button
 from time import sleep
 from random import uniform as rand, randint, shuffle
 from PIL import ImageGrab
+from dotenv import load_dotenv
 
-keyboard = keyCont()
-mouse = Controller()
+keyboard = KeyboardController()
+mouse = MouseController()
 
 cur_dir = curdir
 img_dir = '\\FUTImgs'
 
-class Cord:
+load_dotenv()
+
+class ImageCord:
     
     # Image Locations
-    no_transfers_found_dell = (982, 618, 983, 619)
-    player_red_cross = (1460, 402, 1461, 403)
-
-    card_type_red_cross = (959, 466, 960, 467)
-
-    card_pos = [(490, 350, 491, 351), (490, 470, 491, 471), (490, 589, 491, 590), (490, 706, 491, 707), (490, 823, 491, 824), (490, 908, 491, 909)]
-
-    check_logged_out = (1155, 501, 1156, 502)
-    check_not_logged_out = (562, 380, 563, 381)
-    
-    duplicate_item = (1443, 770, 1444, 771)
-
-    # Mouse Positions
-    name_location = (462, 321)
-    name_press_location = (453, 381)
-
-    max_BIN_price = (874, 686)
-
-    search_button = (997, 754)
-    
-    mouse_off_text_box = (1001, 651)
-
-    card_type = (518, 375)
-    special_card_type = (498, 522)
-    card_type_cross = (775, 374)
-
-    logged_out_ok = (708, 518)
-
-    #FUTSnipeEXE Locations
-
-    shortcuts = (1289, 158)
-    buy_it_price = (240, 267)
-
-    list_on_market_bid = (196, 305)
-    list_on_market_BIN = (240, 305)
+    no_transfers_found = os.getenv('no_transfers_found')            # White magnifiying glass when transfers not found.
+    player_red_cross = os.getenv('player_red_cross')                # Red cross on player search bar, middle of red cross.
+    card_type_red_cross = os.getenv('card_type_red_cross')          # Red cross on card quality pulldown, middle of red cross.
+    card_pos = os.getenv('card_pos')                                # List of positions that the card tile (i.e the top left gold section on a gold card, 6 different locations) appears during a search.
+    check_logged_out = os.getenv('check_logged_out')                # Area next to ok when logged out error message pops up.
+    check_not_logged_out = os.getenv('check_not_logged_out')        # Area in the bottom right of the screen when the message pops up, screen goes dark if msg pops up, so this area will be darker than usual.
+    duplicate_item = os.getenv('duplicate_item')                    # One of the white characters in the word 'Item' when item is duplicate ('Swap Duplicate item' text)
 
 
-"""
-MAKE SURE YOUR BROWSER WINDOW IS ON 75% ZOOM!!!
-MAKE SURE YOUR COMPUTER DISPLAY HAS A RESOLUTION OF 1920 x 1080 pixels, 
-AND that it has an 125% Scaling and Layout!
+class ImageColour:
+
+    # Image colours
+    red_cross_colour = os.getenv('red_cross_colour') 
+    dark_generic_colour = os.getenv('dark_generic_colour') 
+    darkened_corner_colour = os.getenv('darkened_corner_colour') 
+    white_generic_colour = os.getenv('white_generic_colour')
+    item_not_there_colour = os.getenv('item_not_there_colour') 
 
 
-Set-up the exeSniper extension with the following settings:
+class MouseCord:
 
-Search + Buy it now + OK: O
-Sent to Transfer List: T
+        # Mouse Positions
+        name_location = os.getenv('name_location')                  # Text box location of player search
+        name_press_location = os.getenv('name_press_location')      # Location of first player name when typing in a name
+        mouse_off_text_box = os.getenv('mouse_off_text_box')        # Space for the mouse to move off the text box after finding a name
+        card_type = os.getenv('card_type')                          # Card quality box location
+        special_card_type = os.getenv('special_card_type')          # Special card quality location after pressing quality box
+        card_type_cross = os.getenv('card_type_cross')              # Red cross that deselects card quality
+        logged_out_ok = os.getenv('logged_out_ok')                  # Location of 'OK' button if asked to log back in
+        search_button = os.getenv('search_button')                  # Location of search button
+        max_BIN_price = os.getenv('max_BIN_price')                  # Location of max BIN Price text box
 
-List on Market 1: A
+        #FUTSnipeEXE Locations
+        shortcuts = os.getenv('shortcuts')                          # Location of exeSniper shortcuts button
+        buy_it_price = os.getenv('buy_it_price')                    # Location of search + buy it now + OK text box value on exeSniper shortcuts
+        list_on_market_BIN = os.getenv('list_on_market_BIN')        # Location of list on market 1 text box BIN value on exeSniper shortcuts
 
-Decrease Min BIN: U
-Increase Min BIN: I
-Reset Min BIN: R
-
-Decrease Max BIN: J
-Increase Max BIN: K
-Reset Max BIN: H
-
-Back Page: 9
-
-Below is the dictionary where you can change these values if you so desire.
-"""
 
 key_dict = {
     'searchBuy': 'o',
-    'listItem': 'a',
+    'listItem': 'f',
     'sendToTL': 't',
     'sendToClub': 's',
     'dMinBIN': 'u',
@@ -178,29 +156,29 @@ def set_as_special():
 
 
 def set_up_player(player, price, is_special):
-    mouse_click(Cord.name_location, 1)
+    mouse_click(MouseCord.name_location, 1)
     type_word(player, 1.5)
     sleep(2.5)
-    mouse_click(Cord.name_press_location, 0.1)
+    mouse_click(MouseCord.name_press_location, 0.1)
     sleep(0.5)
 
-    if is_pixel(Cord.card_type_red_cross, (0,0), (227, 22, 56)):
-        mouse_click(Cord.card_type_cross, 0.3)
+    if is_pixel(ImageCord.card_type_red_cross, (0,0), ImageColour.red_cross_colour):
+        mouse_click(MouseCord.card_type_cross, 0.3)
 
     if is_special:
 
-        mouse_click(Cord.card_type, 0.3)
-        mouse_click(Cord.special_card_type, 0.3)
+        mouse_click(MouseCord.card_type, 0.3)
+        mouse_click(MouseCord.special_card_type, 0.3)
 
 
-    mouse_click(Cord.max_BIN_price, 0.5)
+    mouse_click(MouseCord.max_BIN_price, 0.5)
     type_word(price, 0.1)
-    mouse_click(Cord.mouse_off_text_box, 0.5)
+    mouse_click(MouseCord.mouse_off_text_box, 0.5)
 
 
 def send_or_tl_player():
     rand_sleep(0.5)
-    if is_pixel(Cord.duplicate_item, (0,0), (38, 44, 56)):
+    if is_pixel(ImageCord.duplicate_item, (0,0), ImageColour.dark_generic_colour):
         key_press(key_dict['sendToClub'], 1)
     else:
         key_press(key_dict['sendToTL'], 1)
@@ -211,9 +189,9 @@ def search_for_player(delay_length=25, num_cycles=10, send_to_club=False):
     for c in range(num_cycles):
         sleep(2)
         
-        if is_pixel(Cord.check_logged_out, (0,0), (28, 31, 38)) and not is_pixel(Cord.check_not_logged_out, (0,0), (28, 31, 38)):
+        if is_pixel(ImageCord.check_logged_out, (0,0), ImageColour.dark_generic_colour) and is_pixel(ImageCord.check_not_logged_out, (0,0), ImageColour.darkened_corner_colour):
             sleep(2)
-            mouse_click(Cord.logged_out_ok, 3)
+            mouse_click(MouseCord.logged_out_ok, 3)
             return True
 
         key_press(key_dict['rMinBIN'], 0.1)
@@ -224,9 +202,11 @@ def search_for_player(delay_length=25, num_cycles=10, send_to_club=False):
             while True:
                 sleep(0.1)
                 # Check if any results appeared
-                if is_pixel(Cord.no_transfers_found_dell, (0,0), (242,242,242)):
+                if is_pixel(ImageCord.no_transfers_found, (0,0), ImageColour.white_generic_colour):
                     no_results = True
-                if no_results or not is_pixel(Cord.card_pos[0], (0,0), (28, 31, 38)):
+
+                
+                if no_results or not is_pixel(ImageCord.card_pos[0], (0,0), ImageColour.item_not_there_colour):
                     break      
 
             if not no_results:
@@ -261,10 +241,10 @@ def find_transfer_price(est_price):
     sleep(1)
     first = True 
     while True:
-        mouse_click(Cord.search_button, 3)
+        mouse_click(MouseCord.search_button, 3)
         num_players = 0
-        for box in Cord.card_pos:
-            if not is_pixel(box, (0,0), (28, 31, 38)):
+        for box in ImageCord.card_pos:
+            if not is_pixel(box, (0,0), ImageColour.item_not_there_colour):
                 num_players += 1
             else:
                 break
@@ -287,21 +267,15 @@ def find_transfer_price(est_price):
 def set_up_price(price, min_undercut):
     key_press(key_dict['rMinBIN'], 0.2)
     bin_price = price
-    bid_price = decrement_price(price)
     buying_pice = int(bin_price * 0.95) - min_undercut
 
-    mouse_click(Cord.shortcuts, 0.3)
-    mouse_click(Cord.list_on_market_bid, 0.3, 2)
-    type_word(bid_price, 0.2)
-    mouse_click(Cord.list_on_market_BIN, 0.3, 2)
+    mouse_click(MouseCord.shortcuts, 0.3)
+    mouse_click(MouseCord.list_on_market_BIN, 0.3, 2)
     type_word(bin_price, 0.2)
-    mouse_click(Cord.buy_it_price, 0.3, 2)
+    mouse_click(MouseCord.buy_it_price, 0.3, 2)
     type_word(buying_pice + 1000, 0.2)
-    mouse_click(Cord.shortcuts, 0.3)
-
-    mouse_click(Cord.max_BIN_price, 0.3)
-    type_word(buying_pice, 0.1)
-    mouse_click(Cord.mouse_off_text_box, 0.5)
+    mouse_click(MouseCord.shortcuts, 0.3)
+    mouse_click(MouseCord.mouse_off_text_box, 0.5)
 
 
 def run(players, min_undercut=500, num_loops=1, random=False, delay_length=10):
@@ -321,7 +295,7 @@ def run(players, min_undercut=500, num_loops=1, random=False, delay_length=10):
             cut_early = True
 
             # Failover: if player isn't selected DO NOT SEARCH.
-            if is_pixel(Cord.player_red_cross, (0,0), (227,22,56)):
+            if is_pixel(ImageCord.player_red_cross, (0,0), ImageColour.red_cross_colour):
                 new_price = find_transfer_price(price)
                 set_up_price(new_price, min_undercut)
                 cut_early = search_for_player(delay_length, num_cycles=20)
@@ -377,13 +351,7 @@ if __name__ == "__main__":
     Importantly, the player MUST be spelt correctly and must appear as the FIRST option on the dropdown menu when you type their name in.
     If you are searching for Luis Suarez, make sure you put their full name in, whereas if you are looking for Sancho, you only need to type
     'Sancho' as it appears as the first option.
-    The last boolean is whether the card is a 'special' type or not, like an TOTW.
-
-    To use the Ryan() function, put in a delay time (probably between 15-25 seconds) for every 8 searches. If you are away from the computer for a while,
-    do a longer delay and it will be less likely you get kicked off. The second number is the number of cycles, which is the number of times the bot
-    will search 8 times.
+    The last boolean is whether the card is a 'special' type or not, like a TOTW.
     """
-    #players = [('ziyech', 20750, True), ('Verratti', 41000, True), ('Digne', 23000, True)]
-    #run(players, min_undercut=300, num_loops=2, random=True, delay_length=30)
-    buy_players_only(15, 60)
-    #ryan(15, 60)
+    players = [('ziyech', 20750, True), ('Verratti', 41000, True), ('Digne', 23000, True)]
+    run(players, min_undercut=300, num_loops=2, random=True, delay_length=30)
