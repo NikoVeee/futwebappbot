@@ -1,14 +1,12 @@
-from os import curdir
-import os
-import time
+import ast
+from os import curdir, getenv
 from typing import List, Tuple
 from pynput.keyboard import Controller as KeyboardController, Key
 from pynput.mouse import Controller as MouseController, Button
-from time import sleep
+from time import sleep, time
 from random import uniform as rand, randint, shuffle
 from PIL import ImageGrab, Image
 from dotenv import load_dotenv
-import ast
 
 keyboard = KeyboardController()
 mouse = MouseController()
@@ -21,54 +19,55 @@ load_dotenv()
 class ImageCord:
     
     # Image Locations
-    no_transfers_found = ast.literal_eval(os.getenv('no_transfers_found'))                          # White magnifiying glass when transfers not found.
-    player_red_cross = ast.literal_eval(os.getenv('player_red_cross'))                              # Red cross on player search bar, middle of red cross.
-    card_type_red_cross = ast.literal_eval(os.getenv('card_type_red_cross'))                        # Red cross on card quality pulldown, middle of red cross.
-    card_pos = ast.literal_eval(os.getenv('card_pos'))                                              # List of positions that the card tile (i.e the top left gold section on a gold card, 6 different locations) appears during a search.
-    cannot_authenticate = ast.literal_eval(os.getenv('cannot_authenticate'))                        # Header of the cannot authenticate error message.
-    duplicate_item = ast.literal_eval(os.getenv('duplicate_item'))                                  # One of the white characters in the word 'Item' when item is duplicate ('Swap Duplicate item' text).
-    failed_purchase = ast.literal_eval(os.getenv('failed_purchase'))                                # Box that appears if purchase failed.
-    transfer_found = ast.literal_eval(os.getenv('transfer_found'))                                  # Orange 'watch' button that appears if a result occurs.
+    no_transfers_found = ast.literal_eval(getenv('no_transfers_found'))                          # White magnifiying glass when transfers not found.
+    player_red_cross = ast.literal_eval(getenv('player_red_cross'))                              # Red cross on player search bar, middle of red cross.
+    card_type_red_cross = ast.literal_eval(getenv('card_type_red_cross'))                        # Red cross on card quality pulldown, middle of red cross.
+    card_pos = ast.literal_eval(getenv('card_pos'))                                              # List of positions that the card tile (i.e the top left gold section on a gold card, 6 different locations) appears during a search.
+    cannot_authenticate = ast.literal_eval(getenv('cannot_authenticate'))                        # Header of the cannot authenticate error message.
+    duplicate_item = ast.literal_eval(getenv('duplicate_item'))                                  # One of the white characters in the word 'Item' when item is duplicate ('Swap Duplicate item' text).
+    failed_purchase = ast.literal_eval(getenv('failed_purchase'))                                # Box that appears if purchase failed.
+    transfer_found = ast.literal_eval(getenv('transfer_found'))                                  # Orange 'watch' button that appears if a result occurs.
     
 
 class ImageColour:
 
     # Image colours
-    red_cross_colour = ast.literal_eval(os.getenv('red_cross_colour'))                              # Red cross colour.
-    dark_generic_colour = ast.literal_eval(os.getenv('dark_generic_colour'))                        # Generic dark blue colour for buttons.
-    purple_cannot_auth = ast.literal_eval(os.getenv('purple_cannot_auth'))                          # Colour of the cannot authenticate header (i.e. logged out message),
-    white_generic_colour = ast.literal_eval(os.getenv('white_generic_colour'))                      # White generic text colour.
-    tranfer_found_box_information_bg_colour = ast.literal_eval(os.getenv('tranfer_found_box_information_bg_colour'))                    # Generic orange colour for buttons.
-    item_not_there_colour = ast.literal_eval(os.getenv('item_not_there_colour'))                    # Colour of transfer results when item is not there (background of item selection).
+    red_cross_colour = ast.literal_eval(getenv('red_cross_colour'))                              # Red cross colour.
+    dark_generic_colour = ast.literal_eval(getenv('dark_generic_colour'))                        # Generic dark blue colour for buttons.
+    purple_cannot_auth = ast.literal_eval(getenv('purple_cannot_auth'))                          # Colour of the cannot authenticate header (i.e. logged out message),
+    white_generic_colour = ast.literal_eval(getenv('white_generic_colour'))                      # White generic text colour.
+    tranfer_found_box_information_bg_colour = ast.literal_eval(getenv('tranfer_found_box_information_bg_colour'))                    # Generic orange colour for buttons.
+    item_not_there_colour = ast.literal_eval(getenv('item_not_there_colour'))                    # Colour of transfer results when item is not there (background of item selection).
+    bg_colour_no_transfers = ast.literal_eval(getenv('bg_colour_no_transfers'))                   
 
 
 class MouseCord:
 
     # Mouse Positions
-    name_location = ast.literal_eval(os.getenv('name_location'))                                    # Text box location of player search.
-    name_press_location = ast.literal_eval(os.getenv('name_press_location'))                        # Location of first player name when typing in a name.
-    mouse_off_text_box = ast.literal_eval(os.getenv('mouse_off_text_box'))                          # Space for the mouse to move off the text box after finding a name.
-    card_type = ast.literal_eval(os.getenv('card_type'))                                            # Card quality box location.
-    special_card_type = ast.literal_eval(os.getenv('special_card_type'))                            # Special card quality location after pressing quality box.
-    card_type_cross = ast.literal_eval(os.getenv('card_type_cross'))                                # Red cross that deselects card quality.
-    logged_out_ok = ast.literal_eval(os.getenv('logged_out_ok'))                                    # Location of 'OK' button if asked to log back in.                               # Location of search button.
-    player_max_BIN_price = ast.literal_eval(os.getenv('player_max_BIN_price'))                      # Location of max BIN Price text box.
-    consumables_max_BIN_price = ast.literal_eval(os.getenv('consumables_max_BIN_price'))            # Consumables max BIN price text box.
-    player_search_tab = ast.literal_eval(os.getenv('player_search_tab'))                            # Player search tab.
-    consumables_search_tab = ast.literal_eval(os.getenv('consumables_search_tab'))                  # Consumables search tab.
-    consumable_dropdown = ast.literal_eval(os.getenv('consumable_dropdown'))                        # Location of consumable dropdown menu. 
-    chemstyle_dropdown = ast.literal_eval(os.getenv('chemstyle_dropdown'))                          # Location of chemstyle dropdown menu. 
-    chemstyle_menu_scroll = ast.literal_eval(os.getenv('chemstyle_menu_scroll'))                    # Chem style menu location for scrolling.
-    chemstyle_option = ast.literal_eval(os.getenv('chemstyle_option'))                              # Location of chemstyle choice dropdown.
-    first_chemstyle_choice_select = ast.literal_eval(os.getenv('first_chemstyle_choice_select'))    # Location of the first chem style on the list - use scroll to select which item will be there.
-    clear_sold_button = ast.literal_eval(os.getenv('clear_sold_button'))                            # Location of the clear sold button on the transfer list page.
-    reset_all_transfer_search = ast.literal_eval(os.getenv('reset_all_transfer_search'))            # Location of the reset button on the transfer screen.
+    name_location = ast.literal_eval(getenv('name_location'))                                    # Text box location of player search.
+    name_press_location = ast.literal_eval(getenv('name_press_location'))                        # Location of first player name when typing in a name.
+    mouse_off_text_box = ast.literal_eval(getenv('mouse_off_text_box'))                          # Space for the mouse to move off the text box after finding a name.
+    card_type = ast.literal_eval(getenv('card_type'))                                            # Card quality box location.
+    special_card_type = ast.literal_eval(getenv('special_card_type'))                            # Special card quality location after pressing quality box.
+    card_type_cross = ast.literal_eval(getenv('card_type_cross'))                                # Red cross that deselects card quality.
+    logged_out_ok = ast.literal_eval(getenv('logged_out_ok'))                                    # Location of 'OK' button if asked to log back in.                               # Location of search button.
+    player_max_BIN_price = ast.literal_eval(getenv('player_max_BIN_price'))                      # Location of max BIN Price text box.
+    consumables_max_BIN_price = ast.literal_eval(getenv('consumables_max_BIN_price'))            # Consumables max BIN price text box.
+    player_search_tab = ast.literal_eval(getenv('player_search_tab'))                            # Player search tab.
+    consumables_search_tab = ast.literal_eval(getenv('consumables_search_tab'))                  # Consumables search tab.
+    consumable_dropdown = ast.literal_eval(getenv('consumable_dropdown'))                        # Location of consumable dropdown menu. 
+    chemstyle_dropdown = ast.literal_eval(getenv('chemstyle_dropdown'))                          # Location of chemstyle dropdown menu. 
+    chemstyle_menu_scroll = ast.literal_eval(getenv('chemstyle_menu_scroll'))                    # Chem style menu location for scrolling.
+    chemstyle_option = ast.literal_eval(getenv('chemstyle_option'))                              # Location of chemstyle choice selection.
+    first_chemstyle_choice_select = ast.literal_eval(getenv('first_chemstyle_choice_select'))    # Location of the first chem style on the list - use scroll to select which item will be there.
+    clear_sold_button = ast.literal_eval(getenv('clear_sold_button'))                            # Location of the clear sold button on the transfer list page.
+    reset_all_transfer_search = ast.literal_eval(getenv('reset_all_transfer_search'))            # Location of the reset button on the transfer screen.
     
 
     #FUTSnipeEXE Locations
-    shortcuts = ast.literal_eval(os.getenv('shortcuts'))                                            # Location of exeSniper shortcuts button
-    buy_it_price = ast.literal_eval(os.getenv('buy_it_price'))                                      # Location of search + buy it now + OK text box value on exeSniper shortcuts
-    list_on_market_BIN = ast.literal_eval(os.getenv('list_on_market_BIN'))                          # Location of list on market 1 text box BIN value on exeSniper shortcuts
+    shortcuts = ast.literal_eval(getenv('shortcuts'))                                            # Location of exeSniper shortcuts button
+    buy_it_price = ast.literal_eval(getenv('buy_it_price'))                                      # Location of search + buy it now + OK text box value on exeSniper shortcuts
+    list_on_market_BIN = ast.literal_eval(getenv('list_on_market_BIN'))                          # Location of list on market 1 text box BIN value on exeSniper shortcuts
 
 
 key_dict = {
@@ -93,9 +92,11 @@ key_dict = {
 
 consumable_scroll_dict = {
     # Maps chemstyle to amount of scrolling required.
-    'anchor': 13,
-    'hunter': 14,
-    'shadow': 15
+    'basic': int(getenv('BASIC_CHEM_STYLE_SCROLL_VALUE')),
+    'architect': int(getenv('ARCHITECT_CHEM_STYLE_SCROLL_VALUE')), 
+    'anchor': int(getenv('ANCHOR_CHEM_STYLE_SCROLL_VALUE')),
+    'hunter': int(getenv('HUNTER_CHEM_STYLE_SCROLL_VALUE')),
+    'shadow': int(getenv('SHADOW_CHEM_STYLE_SCROLL_VALUE'))
 }
 
 
@@ -293,6 +294,8 @@ def set_up_chemstyle(chemstyle: str) -> None:
     Raises:
         Exception: Chemstyle not in dictionary.
     """
+    key_press(key_dict['transSearch'], 3)
+    key_press(key_dict['rMinBIN'], 0.2)
     mouse_click(MouseCord.consumables_search_tab, 1)
     mouse_click(MouseCord.reset_all_transfer_search, 1)
     mouse_click(MouseCord.consumable_dropdown, 1)
@@ -473,7 +476,7 @@ def find_transfer_price(est_price: int) -> int:
         key_press(key_dict['searchNoBuy'], 3)
         num_items = 0
         for box in ImageCord.card_pos:
-            if not is_pixel(box, (0,0), ImageColour.item_not_there_colour):
+            if not is_pixel(box, (0,0), ImageColour.item_not_there_colour) and not is_pixel(box, (0,0), ImageColour.bg_colour_no_transfers):
                 num_items += 1
             else:
                 break
@@ -551,8 +554,6 @@ def chemstyle_sniping(chemstyles: List[Tuple[str, int]], min_undercut: int = 100
     
     while loops < num_loops:
         
-        key_press(key_dict['transSearch'], 2)
-        key_press(key_dict['rMinBIN'], 0.2)
         for chemstyle, price in chemstyles:
             set_up_chemstyle(chemstyle)
             rand_sleep(1)
@@ -562,11 +563,11 @@ def chemstyle_sniping(chemstyles: List[Tuple[str, int]], min_undercut: int = 100
 
             if cut_early:
                 break
-            
-        clear_tranfer_list()
-
+        
         if cut_early:
             break
+
+        clear_tranfer_list()
         
         loops += 1
 
@@ -584,7 +585,7 @@ def run(players: List[Tuple[str, int]] = None, consumables: List[Tuple[str, int]
         delay_length (float, optional): Number of seconds to sleep when searching for an item. Defaults to 10.
     """
 
-    start_time = time.time()
+    start_time = time()
 
     sleep(2)    
     if players:
@@ -593,7 +594,7 @@ def run(players: List[Tuple[str, int]] = None, consumables: List[Tuple[str, int]
     elif consumables:
         cut_early = chemstyle_sniping(consumables, min_undercut, num_loops, delay_length)
     
-    elapsed_time = time.time() - start_time
+    elapsed_time = time() - start_time
     hours = elapsed_time // 3600
     minutes = (elapsed_time - hours*3600)//60
     seconds = elapsed_time - hours*3600 - minutes*60
@@ -603,11 +604,11 @@ def run(players: List[Tuple[str, int]] = None, consumables: List[Tuple[str, int]
 
 # def ryan(delay_length, num_cycles):
 
-#     start_time = time.time()
+#     start_time = time()
     
 #     cut_early = search_for_item(delay_length, num_cycles)
 
-#     elapsed_time = time.time() - start_time
+#     elapsed_time = time() - start_time
 #     hours = elapsed_time // 3600
 #     minutes = (elapsed_time - hours*3600)//60
 #     seconds = elapsed_time - hours*3600 - minutes*60
@@ -616,17 +617,16 @@ def run(players: List[Tuple[str, int]] = None, consumables: List[Tuple[str, int]
 
 
 def buy_players_only(delay_length, num_cycles):
-    start_time = time.time()
+    start_time = time()
     
     cut_early = search_for_item(delay_length, num_cycles, send_to_club=True)
 
-    elapsed_time = time.time() - start_time
+    elapsed_time = time() - start_time
     hours = elapsed_time // 3600
     minutes = (elapsed_time - hours*3600)//60
     seconds = elapsed_time - hours*3600 - minutes*60
 
     print(f"{'Operation Halted Early. ' if cut_early else ''}Time taken for operation: {hours:02.0f}h {minutes:02.0f}m {seconds:02.0f}s")
-
 
 
 if __name__ == "__main__":
@@ -638,7 +638,16 @@ if __name__ == "__main__":
     'Sancho' as it appears as the first option.
     The last boolean is whether the card is a 'special' type or not, like a TOTW.
     """
-    # players = [('cuadrado', 13500, False), ('frimpong', 11500, False), ('clauss', 13500, True), ('sorloth', 16500, True)]
-    # run(players=players, 2887=500, num_loops=5, random=True, delay_length=10)
-    chemstyles = [('anchor', 1100), ('hunter', 1500), ('shadow', 2800)]
-    run(consumables=chemstyles, min_undercut=100, num_loops=8, random=True, delay_length=15)
+    # players = [
+    #     ('cuadrado', 10000, False), 
+    #     ('frimpong', 10000, False), 
+    #     ('clauss', 12000, True), 
+    #     ('sorloth', 12250, True), 
+    #     ("Ikone", 19250, True), 
+    #     ("Terrier", 14250, True), 
+    #     ("Werner", 23750, True)
+    #     ]
+
+    # run(players=players, min_undercut=400, num_loops=5, random=True, delay_length=10)
+    chemstyles = [('anchor', 1200), ('hunter', 1600), ('shadow', 2800), ('architect', 1200), ('basic', 1700)]
+    run(consumables=chemstyles, min_undercut=100, num_loops=6, delay_length=20)
