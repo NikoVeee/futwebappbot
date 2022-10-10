@@ -38,6 +38,7 @@ class ImageColour:
     white_generic_colour = ast.literal_eval(getenv('white_generic_colour'))                      # White generic text colour.
     tranfer_found_box_information_bg_colour = ast.literal_eval(getenv('tranfer_found_box_information_bg_colour'))                    # Generic orange colour for buttons.
     item_not_there_colour = ast.literal_eval(getenv('item_not_there_colour'))                    # Colour of transfer results when item is not there (background of item selection).
+    bg_colour_no_transfers = ast.literal_eval(getenv('bg_colour_no_transfers'))                   
 
 
 class MouseCord:
@@ -378,7 +379,7 @@ def ok_logout() -> None:
     """
     sleep(2)
     mouse_click(MouseCord.logged_out_ok, 2.5)
-    key_press('enter', 0.5)
+    key_press(Key.enter, 0.5)
 
 
 def search_for_item(delay_length: float = 15, num_cycles: int = 10, send_to_club: bool = False) -> bool:
@@ -475,7 +476,7 @@ def find_transfer_price(est_price: int) -> int:
         key_press(key_dict['searchNoBuy'], 3)
         num_items = 0
         for box in ImageCord.card_pos:
-            if not is_pixel(box, (0,0), ImageColour.item_not_there_colour):
+            if not is_pixel(box, (0,0), ImageColour.item_not_there_colour) and not is_pixel(box, (0,0), ImageColour.bg_colour_no_transfers):
                 num_items += 1
             else:
                 break
@@ -633,7 +634,16 @@ if __name__ == "__main__":
     'Sancho' as it appears as the first option.
     The last boolean is whether the card is a 'special' type or not, like a TOTW.
     """
-    # players = [('cuadrado', 13500, False), ('frimpong', 11500, False), ('clauss', 13500, True), ('sorloth', 16500, True)]
-    # run(players=players, min_undercut=500, num_loops=5, random=True, delay_length=10)
-    chemstyles = [('anchor', 1400), ('hunter', 1800), ('shadow', 3100), ('architect', 1300), ('basic', 1700)]
+    # players = [
+    #     ('cuadrado', 10000, False), 
+    #     ('frimpong', 10000, False), 
+    #     ('clauss', 12000, True), 
+    #     ('sorloth', 12250, True), 
+    #     ("Ikone", 19250, True), 
+    #     ("Terrier", 14250, True), 
+    #     ("Werner", 23750, True)
+    #     ]
+
+    # run(players=players, min_undercut=400, num_loops=5, random=True, delay_length=10)
+    chemstyles = [('anchor', 1200), ('hunter', 1500), ('shadow', 2800), ('architect', 1200), ('basic', 1700)]
     run(consumables=chemstyles, min_undercut=100, num_loops=6, delay_length=20)
