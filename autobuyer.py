@@ -2,7 +2,7 @@ from os import curdir
 import os
 import time
 from typing import List, Tuple
-from pynput.keyboard import Controller as KeyboardController
+from pynput.keyboard import Controller as KeyboardController, Key
 from pynput.mouse import Controller as MouseController, Button
 from time import sleep
 from random import uniform as rand, randint, shuffle
@@ -376,7 +376,7 @@ def ok_logout() -> None:
     """
     sleep(2)
     mouse_click(MouseCord.logged_out_ok, 2.5)
-    key_press('enter', 0.5)
+    key_press(Key.enter, 0.5)
 
 
 def search_for_item(delay_length: float = 15, num_cycles: int = 10, send_to_club: bool = False) -> bool:
@@ -508,9 +508,9 @@ def player_sniping(players: List[Tuple[str, int]], min_undercut: int = 500, num_
     if random:
         shuffle(players)
     
-    key_press(key_dict['transSearch'], 3)
     
     while loops < num_loops:
+        key_press(key_dict['transSearch'], 3)
         key_press(key_dict['rMinBIN'], 0.2)
         for player, price, is_special in players:
             set_up_player(player, price, is_special)
@@ -525,6 +525,7 @@ def player_sniping(players: List[Tuple[str, int]], min_undercut: int = 500, num_
 
             if cut_early:
                 break
+        clear_tranfer_list()
 
         if cut_early:
             break
@@ -532,7 +533,7 @@ def player_sniping(players: List[Tuple[str, int]], min_undercut: int = 500, num_
         loops += 1
 
 
-def chemstyle_sniping(chemstyles: List[Tuple[str, int]], min_undercut: int = 100, num_loops: int = 1, delay_length: float = 10) -> None:
+def chemstyle_sniping(chemstyles: List[Tuple[str, int]], min_undercut: int = 100, num_loops: int = 1, random: bool = False, delay_length: float = 10) -> None:
     """
     Runs the sniping bot for chemstyles. Takes in a list of chemstyles and their selling prices (note not estimate) and attempts to buy 
     them at a price to gain a minimum of min_undercut profit.
@@ -541,9 +542,12 @@ def chemstyle_sniping(chemstyles: List[Tuple[str, int]], min_undercut: int = 100
         chemstyles (List[Tuple[str, int]]): List of chemstyles names and their prices in tuple format: e.g. [('shadow', 3000), ...]
         min_undercut (int, optional): Minimum profit to be made on each purchase. Defaults to 500.
         num_loops (int, optional): Number of loops for the algorithm to run. Defaults to 1.
+        random (bool, optional): If true, the list of players will get shuffled to always start with a new player. Defaults to False.
         delay_length (float, optional): Number of seconds to sleep when searching for an item. Defaults to 10.
     """
     loops = 0
+    if random:
+        shuffle(chemstyles)
     
     while loops < num_loops:
         
@@ -558,7 +562,7 @@ def chemstyle_sniping(chemstyles: List[Tuple[str, int]], min_undercut: int = 100
 
             if cut_early:
                 break
-        
+            
         clear_tranfer_list()
 
         if cut_early:
@@ -635,6 +639,6 @@ if __name__ == "__main__":
     The last boolean is whether the card is a 'special' type or not, like a TOTW.
     """
     # players = [('cuadrado', 13500, False), ('frimpong', 11500, False), ('clauss', 13500, True), ('sorloth', 16500, True)]
-    # run(players=players, min_undercut=500, num_loops=5, random=True, delay_length=10)
-    chemstyles = [('anchor', 1200), ('hunter', 1800), ('shadow', 3000)]
-    run(consumables=chemstyles, min_undercut=100, num_loops=6, delay_length=20)
+    # run(players=players, 2887=500, num_loops=5, random=True, delay_length=10)
+    chemstyles = [('anchor', 1100), ('hunter', 1500), ('shadow', 2800)]
+    run(consumables=chemstyles, min_undercut=100, num_loops=8, random=True, delay_length=15)
