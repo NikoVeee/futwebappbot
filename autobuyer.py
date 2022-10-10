@@ -645,5 +645,5 @@ if __name__ == "__main__":
     #     ]
 
     # run(players=players, min_undercut=400, num_loops=5, random=True, delay_length=10)
-    chemstyles = [('anchor', 1200), ('hunter', 1500), ('shadow', 2800), ('architect', 1200), ('basic', 1700)]
+    chemstyles = [('anchor', 1200), ('hunter', 1600), ('shadow', 2800), ('architect', 1200), ('basic', 1700)]
     run(consumables=chemstyles, min_undercut=100, num_loops=6, delay_length=20)
