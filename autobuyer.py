@@ -7,6 +7,7 @@ from time import sleep, time
 from random import uniform as rand, randint, shuffle
 from PIL import ImageGrab, Image
 from dotenv import load_dotenv
+from termcolor import colored
 
 keyboard = KeyboardController()
 mouse = MouseController()
@@ -82,9 +83,9 @@ key_dict = {
     'dMinBid': 'j',
     'iMinBid': 'k',
     'rMinBid': 'h',
-    'iMaxBIN': '/',
-    'dMaxBIN': '.',
-    'rMaxBIN': ',',
+    'iMaxBIN': '.',
+    'dMaxBIN': ',',
+    'rMaxBIN': '/',
     'back': '9',
     'transSearch': '2',
     'transList': '3',
@@ -369,7 +370,8 @@ def clear_tranfer_list() -> None:
     """
     Clears the transfer list by navigating to the transfer list screen.
     """
-    key_press(key_dict['transList'], 4)
+    sleep(2)
+    key_press(key_dict['transList'], 6)
     mouse_click(MouseCord.clear_sold_button, 4)    
 
 
@@ -382,7 +384,18 @@ def ok_logout() -> None:
     key_press(Key.enter, 0.5)
 
 
-def search_for_item(delay_length: float = 15, num_cycles: int = 10, send_to_club: bool = False) -> bool:
+def quit_app() -> None:
+    """
+    Closes the browser window for additional safety measures.
+    """
+    sleep(2)
+    keyboard.press(Key.ctrl_l)
+    keyboard.press('w')
+    keyboard.release('w')
+    keyboard.release(Key.ctrl_l)
+
+
+def search_for_item(delay_length: float = 15, num_cycles: int = 10, send_to_club: bool = False) -> Tuple:
     """
     Begins the search for an item. Will search for the item 10 x num_cycles number of times.
     If send_to_club is true, then the item will be sent to the club rather than sold.
@@ -393,9 +406,10 @@ def search_for_item(delay_length: float = 15, num_cycles: int = 10, send_to_club
         send_to_club (bool, optional): Will send item to club if True, otherwise item will be sold. Defaults to False.
 
     Returns:
-        bool: True if the logout screen is shown, False if the function finishes on it's own accord.
+        Tuple: Two items - first: A list of statistics of the search.
+                         - second: True if logout screen is shown, False if the function finishes on it's own accord.
     """
-    
+    results_arr = [0, 0, 0]             # 0th: Number of searches, 1st: Number of times a result appears, 2nd: Number of times an item is successfully bought.
     for c in range(num_cycles):
         sleep(1)
         
@@ -410,6 +424,9 @@ def search_for_item(delay_length: float = 15, num_cycles: int = 10, send_to_club
             key_press(key_dict['searchBuy'], 0.6)          
             no_results = False
             break_loop_counter = 0
+
+            results_arr[0] += 1
+
             while True:
                 sleep(0.2)
                 # Check if any results appeared
@@ -423,16 +440,18 @@ def search_for_item(delay_length: float = 15, num_cycles: int = 10, send_to_club
                 
                 # If loops too many times, hard break it to stop it from infinitely running.
                 if break_loop_counter > 10:
-                    print("Something went wrong, infinite loop hit.")
+                    print(colored("Something went wrong, infinite loop hit.", 'red'))
                     ok_logout()
-                    return True
+                    return (results_arr, True)
 
                 break_loop_counter += 1   
 
             if not no_results:
+                results_arr[1] += 1
                 rand_sleep(0.5)
                 if not is_pixel(ImageCord.failed_purchase, (0,0), ImageColour.red_cross_colour):
                     rand_sleep(0.5)
+                    results_arr[2] += 1
                     if send_to_club:
                         sent_or_tl_item()
                     else:
@@ -452,7 +471,7 @@ def search_for_item(delay_length: float = 15, num_cycles: int = 10, send_to_club
         else:
             key_press(key_dict['rMinBid'], 0.2)        
 
-    return False
+    return (results_arr, False)
 
 
 def find_transfer_price(est_price: int) -> int:
@@ -463,7 +482,7 @@ def find_transfer_price(est_price: int) -> int:
         est_price (int): Estimated price of the player in coins.
 
     Returns:
-        int: True selling price of the player in coi
+        int: True selling price of the player in coins.
     """
     cur_price = est_price
     for _ in range(3):
@@ -506,6 +525,7 @@ def player_sniping(players: List[Tuple[str, int]], min_undercut: int = 500, num_
         num_loops (int, optional): Number of loops for the algorithm to run. Defaults to 1.
         random (bool, optional): If true, the list of players will get shuffled to always start with a new player. Defaults to False.
         delay_length (float, optional): Number of seconds to sleep when searching for an item. Defaults to 10.
+
     """
     loops = 0
     if random:
@@ -524,10 +544,15 @@ def player_sniping(players: List[Tuple[str, int]], min_undercut: int = 500, num_
             if is_pixel(ImageCord.player_red_cross, (0,0), ImageColour.red_cross_colour):
                 new_price = find_transfer_price(price)
                 set_up_price(new_price, min_undercut, consumable=False)
-                cut_early = search_for_item(delay_length, num_cycles=20)
+                loop_results, cut_early = search_for_item(delay_length, num_cycles=20)
+
+            print(f"{player}s bought: {loop_results[2]}, Percentage results found: %{100*loop_results[1]/loop_results[0]:.2f}, \
+            Percentage won if found: %{100*loop_results[2]/loop_results[1]:.2f}")
 
             if cut_early:
                 break
+
+
         clear_tranfer_list()
 
         if cut_early:
@@ -559,7 +584,19 @@ def chemstyle_sniping(chemstyles: List[Tuple[str, int]], min_undercut: int = 100
             rand_sleep(1)
             cut_early = True
             set_up_price(price, min_undercut, consumable=True)
-            cut_early = search_for_item(delay_length, num_cycles=20)
+            loop_results, cut_early = search_for_item(delay_length, num_cycles=20)
+
+            print(f"{chemstyle.capitalize()}s bought: {loop_results[2]}")
+            if loop_results[0] > 0: 
+                print(f"\tPercentage results found: {100*loop_results[1]/loop_results[0]:.1f}%;")
+                print(f"\tPercentage won overall: {100*loop_results[2]/loop_results[0]:.1f}%;")
+            else:
+                print(f"\tPercentage results found: 0%;")
+                print(f"\tPercentage won overall: 0%;")
+            if loop_results[1] > 0:
+                print(f"\tPercentage won if found: {100*loop_results[2]/loop_results[1]:.1f}%;")
+            else:
+                print(f"\tPercentage won if found: 0%;")
 
             if cut_early:
                 break
@@ -567,7 +604,8 @@ def chemstyle_sniping(chemstyles: List[Tuple[str, int]], min_undercut: int = 100
         if cut_early:
             break
 
-        clear_tranfer_list()
+        # clear_tranfer_list()
+        # print("Clearing transfer list.... \n\n")
         
         loops += 1
 
@@ -599,21 +637,8 @@ def run(players: List[Tuple[str, int]] = None, consumables: List[Tuple[str, int]
     minutes = (elapsed_time - hours*3600)//60
     seconds = elapsed_time - hours*3600 - minutes*60
 
-    print(f"{'Operation Halted Early. ' if cut_early else ''}Time taken for operation: {hours:02.0f}h {minutes:02.0f}m {seconds:02.0f}s")
-
-
-# def ryan(delay_length, num_cycles):
-
-#     start_time = time()
-    
-#     cut_early = search_for_item(delay_length, num_cycles)
-
-#     elapsed_time = time() - start_time
-#     hours = elapsed_time // 3600
-#     minutes = (elapsed_time - hours*3600)//60
-#     seconds = elapsed_time - hours*3600 - minutes*60
-
-#     print(f"{'Operation Halted Early. ' if cut_early else ''}Time taken for operation: {hours:02.0f}h {minutes:02.0f}m {seconds:02.0f}s")
+    print(colored(f"{'Operation Halted Early. ' if cut_early else ''}Time taken for operation: {hours:02.0f}h {minutes:02.0f}m {seconds:02.0f}s", "green"))
+    quit_app()
 
 
 def buy_players_only(delay_length, num_cycles):
@@ -626,7 +651,7 @@ def buy_players_only(delay_length, num_cycles):
     minutes = (elapsed_time - hours*3600)//60
     seconds = elapsed_time - hours*3600 - minutes*60
 
-    print(f"{'Operation Halted Early. ' if cut_early else ''}Time taken for operation: {hours:02.0f}h {minutes:02.0f}m {seconds:02.0f}s")
+    print(colored(f"{'Operation Halted Early. ' if cut_early else ''}Time taken for operation: {hours:02.0f}h {minutes:02.0f}m {seconds:02.0f}s", "green"))
 
 
 if __name__ == "__main__":
@@ -639,15 +664,20 @@ if __name__ == "__main__":
     The last boolean is whether the card is a 'special' type or not, like a TOTW.
     """
     # players = [
-    #     ('cuadrado', 10000, False), 
-    #     ('frimpong', 10000, False), 
-    #     ('clauss', 12000, True), 
-    #     ('sorloth', 12250, True), 
-    #     ("Ikone", 19250, True), 
-    #     ("Terrier", 14250, True), 
-    #     ("Werner", 23750, True)
+    #     ('Reece James', 13000, False), 
+    #     ('luis diaz', 11000, False), 
+    #     ('guimaraes', 18250, True), 
+    #     ('Zakaria', 10750, False), 
+    #     ("Depay", 16000, False), 
+    #     ("Immobile", 13000, False)
     #     ]
 
     # run(players=players, min_undercut=400, num_loops=5, random=True, delay_length=10)
-    chemstyles = [('anchor', 1200), ('hunter', 1600), ('shadow', 2800), ('architect', 1200), ('basic', 1700)]
+    anchor = ('anchor', 850)
+    basic = ('basic', 2300)
+    hunter = ('hunter', 1500)
+    shadow = ('shadow', 2200)
+    architect =('architect', 1300)
+    
+    chemstyles = [anchor, anchor, basic, hunter, hunter, shadow, shadow, architect]
     run(consumables=chemstyles, min_undercut=100, num_loops=6, delay_length=20)
